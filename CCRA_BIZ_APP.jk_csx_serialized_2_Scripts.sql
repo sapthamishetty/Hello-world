@@ -462,3 +462,12 @@ WHERE case_opened_date   >= current_date - 2
             COLUMN ( case_opened_date ) , 
             COLUMN ( serial_nr ) 
                 ON CCRA_BIZ_APP.jk_csx_serialized_2 ;
+                
+                
+ select * from CCRA_BIZ_APP.jk_csx_serialized_2 sample 1000;
+ select * from CCRA_BIZ_APP.jk_swrelease_true sample 1000;
+ 
+ select distinct eligible_omni_group, SW_Version_Zinger from CCRA_BIZ_APP.jk_csx_serialized_2;
+ 
+ create multiset volatile table temp003 as --this populates the 'Non-Tech Reason', which is the equivalent of the 'Issue_Desc' for TECH cases
+
