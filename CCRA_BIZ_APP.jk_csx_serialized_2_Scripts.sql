@@ -507,11 +507,7 @@ inner join (select eligible_omni_group,SW_Version_Zinger,max(case_opened_date) a
                            )b on a.eligible_omni_group=b.eligible_omni_group
                            and a.SW_Version_Zinger=b.SW_Version_Zinger
                            and a.case_opened_date=b.case_opened_date
-                           
-
-                           
-                           
- 
+                       
  SELECT eligible_omni_group, SW_Version_Zinger,activation_dt
  from CCRA_BIZ_APP.jk_csx_serialized_2
  qualify row_number() over (partition by eligible_omni_group order by activation_dt desc)=1
@@ -520,9 +516,10 @@ inner join (select eligible_omni_group,SW_Version_Zinger,max(case_opened_date) a
  
  
  
+ 
+ 
  SELECT eligible_omni_group, SW_Version, row_number() over (partition by eligible_omni_group order by SW_Version desc) rnk
  from CCRA_BIZ_APP.jk_swrelease_true
- --where SW_Version <>'' and SW_Version <>'Unknown'
  group by eligible_omni_group, SW_Version
  
  
@@ -530,7 +527,7 @@ inner join (select eligible_omni_group,SW_Version_Zinger,max(case_opened_date) a
  from CCRA_BIZ_APP.jk_swrelease_true
  qualify row_number() over (partition by eligible_omni_group order by SW_Version desc)=1
 
-drop table LatestVersion;
+
 
 create volatile table LatestVersion as 
 ( SELECT eligible_omni_group, SW_Version,FCS_Date
@@ -539,16 +536,9 @@ create volatile table LatestVersion as
  )with data
   on commit preserve rows;
  
- 
- select * from LatestVersion
- 
- 
- create view CaseVersion as (
- select Case_Id, Serial_Nr, eligible_omni_group, SW_Version_Zinger,activation_dt
- from CCRA_BIZ_APP.jk_csx_serialized_2 a left join LatestVersion  b on a.eligible_omni_group=b.eligible_omni_group
- where case_opened_date = '2019-03-06'
- )with data
- 
+select * from LatestVersion
+drop table LatestVersion;
+  
 CREATE view CaseVersion as
 SELECT
 a.case_id,
@@ -565,7 +555,6 @@ from CCRA_BIZ_APP.jk_csx_serialized_2 a
 left join LatestVersion b on  a.eligible_omni_group=b.eligible_omni_group and a.SW_Version_Zinger= SW_Version
 where case_opened_date = '2019-03-06'
 
+
 select * from CaseVersion
-
-
 drop view CaseVersion;
