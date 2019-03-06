@@ -467,7 +467,105 @@ WHERE case_opened_date   >= current_date - 2
  select * from CCRA_BIZ_APP.jk_csx_serialized_2 sample 1000;
  select * from CCRA_BIZ_APP.jk_swrelease_true sample 1000;
  
- select distinct eligible_omni_group, SW_Version_Zinger from CCRA_BIZ_APP.jk_csx_serialized_2;
+ select eligible_omni_group, SW_Version_Zinger from CCRA_BIZ_APP.jk_csx_serialized_2
+  group by eligible_omni_group
  
- create multiset volatile table temp003 as --this populates the 'Non-Tech Reason', which is the equivalent of the 'Issue_Desc' for TECH cases
+ select eligible_omni_group, max(SW_Version_Zinger) 
+ from CCRA_BIZ_APP.jk_csx_serialized_2
+ where SW_Version_Zinger is not null
+ group by eligible_omni_group
+ 
+ select max(SW_Version_Zinger) from CCRA_BIZ_APP.jk_csx_serialized_2;
+ 
+ 
+ SELECT eligible_omni_group, SW_Version_Zinger
+  FROM (SELECT eligible_omni_group, SW_Version_Zinger, rank() over (partition by eligible_omni_group order by SW_Version_Zinger desc) rnk
+           from CCRA_BIZ_APP.jk_csx_serialized_2
+           where eligible_omni_group = 'Apple Watch' and case_opened_date = '2019-02-25'
+           group by eligible_omni_group)
+ WHERE rnk = 1;
+ 
+ 
+ 
+ SELECT eligible_omni_group, SW_Version_Zinger, row_number() over (partition by eligible_omni_group order by SW_Version_Zinger desc) rnk
+ from CCRA_BIZ_APP.jk_csx_serialized_2
+ where SW_Version_Zinger <>'' and SW_Version_Zinger <>'Unknown'
+ group by eligible_omni_group, SW_Version_Zinger
+ 
+ 
+  SELECT eligible_omni_group, SW_Version_Zinger
+ from CCRA_BIZ_APP.jk_csx_serialized_2
+  qualify row_number() over (partition by eligible_omni_group order by SW_Version_Zinger desc)=1
+ where SW_Version_Zinger <>'' and SW_Version_Zinger <>'Unknown'
+ 
 
+select  a.eligible_omni_group, a.SW_Version_Zinger,a.case_opened_date
+from CCRA_BIZ_APP.jk_csx_serialized_2 a
+inner join (select eligible_omni_group,SW_Version_Zinger,max(case_opened_date) as case_opened_date
+                          from CCRA_BIZ_APP.jk_csx_serialized_2 
+                           group by eligible_omni_group
+                           )b on a.eligible_omni_group=b.eligible_omni_group
+                           and a.SW_Version_Zinger=b.SW_Version_Zinger
+                           and a.case_opened_date=b.case_opened_date
+                           
+
+                           
+                           
+ 
+ SELECT eligible_omni_group, SW_Version_Zinger,activation_dt
+ from CCRA_BIZ_APP.jk_csx_serialized_2
+ qualify row_number() over (partition by eligible_omni_group order by activation_dt desc)=1
+ where SW_Version_Zinger <>'' and SW_Version_Zinger <>'Unknown'
+ 
+ 
+ 
+ 
+ SELECT eligible_omni_group, SW_Version, row_number() over (partition by eligible_omni_group order by SW_Version desc) rnk
+ from CCRA_BIZ_APP.jk_swrelease_true
+ --where SW_Version <>'' and SW_Version <>'Unknown'
+ group by eligible_omni_group, SW_Version
+ 
+ 
+ SELECT eligible_omni_group, SW_Version
+ from CCRA_BIZ_APP.jk_swrelease_true
+ qualify row_number() over (partition by eligible_omni_group order by SW_Version desc)=1
+
+drop table LatestVersion;
+
+create volatile table LatestVersion as 
+( SELECT eligible_omni_group, SW_Version,FCS_Date
+ from CCRA_BIZ_APP.jk_swrelease_true
+ qualify row_number() over (partition by eligible_omni_group order by FCS_Date desc)=1
+ )with data
+  on commit preserve rows;
+ 
+ 
+ select * from LatestVersion
+ 
+ 
+ create view CaseVersion as (
+ select Case_Id, Serial_Nr, eligible_omni_group, SW_Version_Zinger,activation_dt
+ from CCRA_BIZ_APP.jk_csx_serialized_2 a left join LatestVersion  b on a.eligible_omni_group=b.eligible_omni_group
+ where case_opened_date = '2019-03-06'
+ )with data
+ 
+CREATE view CaseVersion as
+SELECT
+a.case_id,
+a.serial_nr,
+a.case_opened_date,
+a.eligible_omni_group, 
+a.SW_Version_Zinger,
+b.FCS_Date,
+CASE 
+    WHEN a.eligible_omni_group=b.eligible_omni_group and a.SW_Version_Zinger= SW_Version then 'Latest OS'
+    ELSE 'Non-Latest OS'
+END AS OS_Version
+from CCRA_BIZ_APP.jk_csx_serialized_2 a
+left join LatestVersion b on  a.eligible_omni_group=b.eligible_omni_group and a.SW_Version_Zinger= SW_Version
+where case_opened_date = '2019-03-06'
+
+select * from CaseVersion
+
+
+drop view CaseVersion;
