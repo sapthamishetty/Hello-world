@@ -549,7 +549,7 @@ a.SW_Version_Zinger,
 b.FCS_Date,
 CASE 
     WHEN a.eligible_omni_group=b.eligible_omni_group and a.SW_Version_Zinger= SW_Version then 'Latest OS'
-    ELSE 'Non-Latest OS'
+    ELSE 'Not-Latest OS'
 END AS OS_Version
 from CCRA_BIZ_APP.jk_csx_serialized_2 a
 left join LatestVersion b on  a.eligible_omni_group=b.eligible_omni_group and a.SW_Version_Zinger= SW_Version
