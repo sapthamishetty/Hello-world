@@ -563,3 +563,5 @@ drop view CaseVersion;
 drop view CaseVersion;
               
             
+ Collect statistics column(case_IDx) on  CCRA_BIZ_APP.jk_issue_detail_csx;
+ Collect statistics column(Question_Id) on CCRA_BIZ_APP.jk_issue_detail_csx;
