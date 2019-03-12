@@ -568,3 +568,22 @@ drop view CaseVersion;
 drop view CaseVersion;
               select * from CaseVersion
 drop view CaseVersion;
+              
+              
+              
+              
+              CREATE view CaseVersion as
+SELECT
+a.case_id,
+a.serial_nr,
+a.case_opened_date,
+a.eligible_omni_group, 
+a.SW_Version_Zinger,
+b.FCS_Date,
+CASE 
+    WHEN a.eligible_omni_group=b.eligible_omni_group and a.SW_Version_Zinger= SW_Version then 'Latest OS'
+    ELSE 'Not-Latest OS'
+END AS OS_Version
+from CCRA_BIZ_APP.jk_csx_serialized_2 a
+left join LatestVersion b on  a.eligible_omni_group=b.eligible_omni_group and a.SW_Version_Zinger= SW_Version
+where case_opened_date = '2019-03-06'
