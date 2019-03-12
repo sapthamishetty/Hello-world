@@ -587,3 +587,9 @@ END AS OS_Version
 from CCRA_BIZ_APP.jk_csx_serialized_2 a
 left join LatestVersion b on  a.eligible_omni_group=b.eligible_omni_group and a.SW_Version_Zinger= SW_Version
 where case_opened_date = '2019-03-06'
+
+
+FROM ACA.FACT_CASE_DETAIL x
+LEFT JOIN AC_Biz_App.ACA_ACTIVATION ACT ON x.Serial_Nr = ACT.serial_nr AND case_opened_date  >= current_date - 2 --joining to IB table for additional details
+LEFT JOIN  CCRA_BIz_App.jk_serial_configCd CC ON x.serial_nr = CC.serial_nr AND program IN ('D10', 'D11', 'D20','D21', 'D22', 'D32', 'D33', 'N84') --this is not deprecated but still exists in the table
+LEFT JOIN ACA.CX_IPHONE_ZINGER_DETAIL z ON x.case_id = z.case_id --no dups
