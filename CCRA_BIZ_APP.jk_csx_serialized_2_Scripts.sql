@@ -565,3 +565,23 @@ drop view CaseVersion;
             
  Collect statistics column(case_IDx) on  CCRA_BIZ_APP.jk_issue_detail_csx;
  Collect statistics column(Question_Id) on CCRA_BIZ_APP.jk_issue_detail_csx;
+ 
+
+DELETE FROM CCRA_BIZ_APP.jk_issue_detail_csx  --this table populates the "Issue Detail" Field. It's a group of questionIDs/Triggers in iLog
+WHERE row_added_dt >= current_date - 7;
+
+INSERT INTO CCRA_BIZ_APP.jk_issue_detail_csx
+ select
+cq.case_ID case_IDx,
+cq.Question_ID, 
+cq.row_added_dt,
+max(substring(ia.Ans_Txt  from 1 for 75)) issue_detail, 
+max(cq.Ans_ID) Ans_ID
+from aca.cx_case_question cq
+LEFT JOIN ACA.cx_ilog_answer ia on cq.ans_id = ia.ans_id
+LEFT JOIN ACA.cx_ilog_question iq on cq.question_id=iq.question_id
+
+where cq.question_ID in ('Q65045', 'Q20277', 'Q20194', 'Q63395', 'Q64579', 'Q66067', 'Q66018','Q100405', 'Q100851', 'Q201893', 'Q66616', 'Q209531') 
+AND cq.row_added_dt>=current_date-7
+AND cq.Latest_Ind='Y'
+GROUP BY 1,2,3; 
