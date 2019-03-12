@@ -558,3 +558,13 @@ where case_opened_date = '2019-03-06'
 
 select * from CaseVersion
 drop view CaseVersion;
+              select * from CaseVersion
+drop view CaseVersion;
+              select * from CaseVersion
+drop view CaseVersion;
+              select * from CaseVersion
+drop view CaseVersion;
+              select * from CaseVersion
+drop view CaseVersion;
+              select * from CaseVersion
+drop view CaseVersion;
